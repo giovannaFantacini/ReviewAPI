@@ -1,6 +1,7 @@
 package com.Review.ReviewAPI.services;
 
 import com.Review.ReviewAPI.model.Review;
+import com.Review.ReviewAPI.model.ReviewDTO;
 import com.Review.ReviewAPI.repository.ReviewRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.bytebuddy.implementation.bytecode.Throw;
@@ -29,11 +30,11 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Review create(Review rev) throws IOException, InterruptedException {
+    public Review create(ReviewDTO rev) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                                 .GET()
-                                .uri(URI.create("http://localhost:8080/products?sku=" + rev.getSkuProduct()))
+                                .uri(URI.create("http://localhost:8080/products?sku=" + rev.getSku()))
                                 .build();
 
         HttpResponse response = client.send(request,
@@ -41,7 +42,9 @@ public class ReviewServiceImpl implements ReviewService {
 
         var code = response.statusCode();
         if(code == 200){
-            return repository.save(rev);
+            Long userId = Long.valueOf(123456);
+            final Review obj = Review.newFrom(rev,userId);
+            return repository.save(obj);
         }else{
             return (Review) response.body();
         }
@@ -97,5 +100,48 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewsOrderByVote;
     }
 
+    @Override
+    public Boolean approveRejectReview(Long reviewId, Boolean status){
+        Review review = repository.getReviewById(reviewId);
+        try {
+            if (Objects.equals(review.getStatus(), "PENDING")) {
+                if (status) {
+                    review.setStatus("APPROVED");
+                } else {
+                    review.setStatus("REJECTED");
+                }
+                repository.save(review);
+                return true;
+            }else {
+                return false;
+            }
+        }catch (NullPointerException e){
+            return false;
+        }
+
+    }
+
+    public Boolean deleteReview(Long reviewId) throws IOException, InterruptedException {
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .GET()
+                .uri(URI.create("http://localhost:8082/votes/" + reviewId))
+                .build();
+
+        HttpResponse response = client.send(request,
+                HttpResponse.BodyHandlers.ofString());
+
+        if(response.statusCode() == 200){
+            var votes = Integer.parseInt(response.body().toString());
+            Long userId = Long.valueOf(123456);//Brute forced code for testing
+            Review review = repository.getReviewById(reviewId);
+            if(votes == 0 && Objects.equals(review.getUserId(), userId)){
+                repository.delete(review);
+                return true;
+            }
+        }
+        return  false;
+    }
 
 }

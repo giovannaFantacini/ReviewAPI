@@ -1,6 +1,7 @@
 package com.Review.ReviewAPI.controller;
 
 import com.Review.ReviewAPI.model.Review;
+import com.Review.ReviewAPI.model.ReviewDTO;
 import com.Review.ReviewAPI.services.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,7 +33,7 @@ public class ReviewController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Review> createReview(@RequestBody final Review rev) throws IOException, InterruptedException {
+    public ResponseEntity<Review> createReview(@RequestBody final ReviewDTO rev) throws IOException, InterruptedException {
         final Review review = service.create(rev);
         return ResponseEntity.ok(review);
     }
@@ -39,6 +41,25 @@ public class ReviewController {
     @GetMapping(value = "/{skuProducts}/votes")
     public Iterable<Review> getReviewsByProductOrderByVotes(@PathVariable("skuProducts") final String skuProducts) throws IOException, InterruptedException {
         return service.getReviewsByProductOrderByVotes(skuProducts);
+    }
+
+    @PutMapping(value = "/{reviewId}/approve/{reviewStatus}")
+    public ResponseEntity<String> approveRejectReview(@PathVariable("reviewId") final Long reviewId, @PathVariable ("reviewStatus") final Boolean reviewStatus){
+        Boolean status = service.approveRejectReview(reviewId,reviewStatus);
+        if(!status){
+            return ResponseEntity.ok("The review's id you gave it's not associated with a review or this is not in PENDING status");
+
+        }else
+            return ResponseEntity.ok("Review's status is changed");
+    }
+
+    @DeleteMapping(value = "/{reviewId}/remove")
+    public ResponseEntity<String> deleteByReviewId(@PathVariable ("reviewId") final Long reviewId) throws IOException, InterruptedException {
+        Boolean deleted = service.deleteReview(reviewId);
+        if(deleted) {
+            return ResponseEntity.ok("Review deleted");
+        } else
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Review can't be deleted because have votes or you are note de creator");
     }
 
 }
