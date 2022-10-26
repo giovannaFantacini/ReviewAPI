@@ -5,6 +5,7 @@ import com.Review.ReviewAPI.model.Review;
 import org.springframework.data.domain.Page;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 public interface ReviewService {
@@ -13,6 +14,8 @@ public interface ReviewService {
 
     Review create(Review rev) throws IOException, InterruptedException;
 
-    Page <Review> getAllReviews();
+    List<Review> getAllReviews();
+
+    List<Review> getReviewsByProductOrderByVotes(String sku) throws IOException, InterruptedException;
 
 }
