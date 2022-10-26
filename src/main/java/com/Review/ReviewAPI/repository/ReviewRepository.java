@@ -19,9 +19,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r FROM Review r WHERE r.skuProduct = :skuProduct")
     List<Review> getReviewsByProduct(@Param("skuProduct") String skuProduct);
 
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.skuProduct = :skuProduct")
-    Float getAggregatedRating(@Param("sku") String sku);
-
     @Query("SELECT r FROM Review r WHERE r.status ='PENDING'")
     Page <Review> getAllPendingReviews(Pageable pageable);
 

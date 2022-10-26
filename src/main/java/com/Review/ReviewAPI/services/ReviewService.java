@@ -1,6 +1,6 @@
 package com.Review.ReviewAPI.services;
 
-import com.Review.ReviewAPI.model.RatingFrequency;
+
 import com.Review.ReviewAPI.model.Review;
 import com.Review.ReviewAPI.model.ReviewDTO;
 import org.springframework.data.domain.Page;
@@ -19,7 +19,10 @@ public interface ReviewService {
 
     List<Review> getReviewsByProductOrderByVotes(String sku) throws IOException, InterruptedException;
 
+    Page<Review> getAllPendingReviews(int offset, int pageSize);
     Boolean approveRejectReview(Long reviewId, Boolean status);
 
     Boolean deleteReview(Long reviewId) throws IOException, InterruptedException;
+
+
 }

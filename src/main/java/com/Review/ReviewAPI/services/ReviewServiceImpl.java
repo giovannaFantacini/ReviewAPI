@@ -3,15 +3,11 @@ package com.Review.ReviewAPI.services;
 import com.Review.ReviewAPI.model.Review;
 import com.Review.ReviewAPI.model.ReviewDTO;
 import com.Review.ReviewAPI.repository.ReviewRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -54,6 +50,11 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<Review> getAllReviews() {
         return repository.getAllReviews();
+    }
+
+    @Override
+    public Page <Review> getAllPendingReviews(int offset, int pageSize){
+        return repository.getAllPendingReviews(PageRequest.of(offset,pageSize));
     }
 
     @Override
