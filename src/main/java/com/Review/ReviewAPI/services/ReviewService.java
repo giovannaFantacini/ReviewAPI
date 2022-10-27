@@ -1,6 +1,7 @@
 package com.Review.ReviewAPI.services;
 
 
+import com.Review.ReviewAPI.model.RatingFrequency;
 import com.Review.ReviewAPI.model.Review;
 import com.Review.ReviewAPI.model.ReviewDTO;
 import org.springframework.data.domain.Page;
@@ -24,5 +25,6 @@ public interface ReviewService {
 
     Boolean deleteReview(Long reviewId) throws IOException, InterruptedException;
 
+    RatingFrequency getRatingFrequencyOfProduct(String sku);
 
 }

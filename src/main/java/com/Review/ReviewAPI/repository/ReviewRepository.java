@@ -25,5 +25,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r FROM Review r WHERE r.userId = :userId")
     Page <Review> getAllMyReviews(@Param("userId") Long userId,Pageable pageable);
 
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.skuProduct = :sku")
+    Float getAggregatedRating(@Param("sku") String sku);
+
 }
 

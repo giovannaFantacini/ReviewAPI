@@ -1,5 +1,6 @@
 package com.Review.ReviewAPI.controller;
 
+import com.Review.ReviewAPI.model.RatingFrequency;
 import com.Review.ReviewAPI.model.Review;
 import com.Review.ReviewAPI.model.ReviewDTO;
 import com.Review.ReviewAPI.services.ReviewService;
@@ -63,6 +64,11 @@ public class ReviewController {
             return ResponseEntity.ok("Review deleted");
         } else
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Review can't be deleted because have votes or you are note de creator");
+    }
+
+    @GetMapping(value = "/{sku}/rating")
+    public RatingFrequency getRatingFrequency(@PathVariable("sku") final String sku) {
+        return service.getRatingFrequencyOfProduct(sku);
     }
 
 }

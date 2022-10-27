@@ -1,5 +1,6 @@
 package com.Review.ReviewAPI.services;
 
+import com.Review.ReviewAPI.model.RatingFrequency;
 import com.Review.ReviewAPI.model.Review;
 import com.Review.ReviewAPI.model.ReviewDTO;
 import com.Review.ReviewAPI.repository.ReviewRepository;
@@ -143,6 +144,35 @@ public class ReviewServiceImpl implements ReviewService {
             }
         }
         return  false;
+    }
+
+    @Override
+    public RatingFrequency getRatingFrequencyOfProduct(String sku){
+
+        List<Review> reviews = repository.getReviewsByProduct(sku);
+        int rating;
+        int one=0, two=0, three=0, four=0, five=0;
+        RatingFrequency freq = new RatingFrequency();
+        for (int i=0; i< reviews.size(); i++){
+            rating=reviews.get(i).getRating();
+            if (rating == 1){
+                one = one + 1;
+            }
+            else if (rating == 2){
+                two = two + 1;
+            }
+            else if (rating == 3){
+                three = three + 1;
+            }
+            else if (rating == 4){
+                four = four + 1;
+            }
+            else if (rating == 5){
+                five = five + 1;
+            }
+        }
+        float globalRating = repository.getAggregatedRating(sku);
+        return new RatingFrequency(one, two, three, four, five, globalRating);
     }
 
 }
