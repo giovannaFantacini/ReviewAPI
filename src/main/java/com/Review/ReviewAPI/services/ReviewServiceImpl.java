@@ -4,6 +4,8 @@ import com.Review.ReviewAPI.model.RatingFrequency;
 import com.Review.ReviewAPI.model.Review;
 import com.Review.ReviewAPI.model.ReviewDTO;
 import com.Review.ReviewAPI.repository.ReviewRepository;
+import com.Review.ReviewAPI.security.JwtUtils;
+import com.sun.jdi.LongValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,9 @@ import java.util.stream.Collectors;
 public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private ReviewRepository repository;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @Override
     public Optional<Review> findOne(Long reviewId) {
@@ -39,7 +44,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         var code = response.statusCode();
         if(code == 200){
-            Long userId = Long.valueOf(123456);
+            Long userId = Long.valueOf(jwtUtils.getUserFromJwtToken(jwtUtils.getJwt()));
             final Review obj = Review.newFrom(rev,userId);
             return repository.save(obj);
         }else{
