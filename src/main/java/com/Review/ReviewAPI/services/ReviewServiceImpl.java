@@ -141,7 +141,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         if(response.statusCode() == 200){
             var votes = Integer.parseInt(response.body().toString());
-            Long userId = Long.valueOf(123456);//Brute forced code for testing
+            Long userId = Long.valueOf(jwtUtils.getUserFromJwtToken(jwtUtils.getJwt()));
             Review review = repository.getReviewById(reviewId);
             if(votes == 0 && Objects.equals(review.getUserId(), userId)){
                 repository.delete(review);

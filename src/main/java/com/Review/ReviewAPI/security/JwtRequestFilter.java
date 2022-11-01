@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -35,15 +36,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
-            jwtUtils.setJwt(jwtToken);
             try {
                 username = jwtUtils.getUserFromJwtToken(jwtToken);
+                jwtUtils.setJwt(jwtToken);
             } catch (IllegalArgumentException e) {
                 System.out.println("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
                 System.out.println("JWT Token has expired");
             }
         } else {
+            jwtUtils.setJwt(null);
             logger.warn("JWT Token does not begin with Bearer String");
         }
 
@@ -51,7 +53,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             if (jwtUtils.validateJwtToken(jwtToken)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        username, null, Collections.singleton(new SimpleGrantedAuthority("ROLE_" + "MODERATOR")));
+                        username, null, AuthorityUtils.createAuthorityList("REG_USER"));
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
