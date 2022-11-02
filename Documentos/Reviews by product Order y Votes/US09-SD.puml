@@ -1,0 +1,21 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autoactivate on
+autonumber
+
+actor "User" as User
+participant ":ReviewController" as Ctrl
+participant ":ReviewService" as Service
+participant ":ReviewRepository" as Rep
+
+activate User
+
+
+User -> Ctrl: GET/review/{sku}/votes?offset={offset}&pageSize={pageSize}
+Ctrl -> Service: getReviewsByProductOrderByVotes(sku,offset,pageSize)
+Service -> Rep: getReviewsByProductOrderByVotes(sku,pageable)
+Rep --> Service: list
+Service --> Ctrl: list
+Ctrl --> User: list
+@enduml

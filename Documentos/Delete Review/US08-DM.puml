@@ -1,0 +1,29 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+skinparam classAttributeIconSize 0
+hide circle
+hide methods
+
+class RegUser{
+-UserId
+-Name
+-Password
+-Email
+-Address
+-Role
+}
+
+class Review{
+-ReviewId
+-Text
+-Rating
+-Date
+-Status
+-upVote
+-downVote
+}
+
+RegUser "1" -right-- "0..*" Review:  make and rates >
+
+@enduml

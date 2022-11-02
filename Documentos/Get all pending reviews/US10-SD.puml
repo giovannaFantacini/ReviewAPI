@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autoactivate on
+autonumber
+
+actor ":Moderator" as User
+
+participant ":ReviewController" as Ctrl
+participant "service:ReviewService" as Service
+participant "repo:ReviewRepository" as Repo
+
+
+activate User
+
+
+User -> Ctrl: GET/reviews/pending
+Ctrl -> Service: getAllPendingReviews
+Service -> Repo: getAllPendingReviews
+Repo --> Service: list
+Service --> Ctrl: list
+Ctrl --> User: list
+
+@enduml

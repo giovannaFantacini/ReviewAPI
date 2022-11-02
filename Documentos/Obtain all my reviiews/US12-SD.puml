@@ -1,0 +1,22 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autoactivate on
+autonumber
+
+actor "RegUser" as User
+participant ":ReviewController" as Ctrl
+participant ":ReviewService" as Service
+participant ":ReviewRepository" as Rep
+
+activate User
+
+
+User -> Ctrl: GET/reviews/myReview
+Ctrl -> Service: getAllMyReviews
+''Ver como obter userID
+Service -> Rep: getAllMyReviews(userId)
+Rep --> Service: list
+Service --> Ctrl: list
+Ctrl --> User: list
+@enduml

@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+hide circle
+skinparam classAttributeIconSize 0
+
+class ReviewController {
+    +create(ReviewDto, sku): Result
+}
+
+class ReviewService {
+ + create(ReviewDTO, sku) : Review
+}
+
+class Review {
+   - reviewId
+   - text
+   - date
+   - status
+   - rating
+   - upVotes
+   - downVotes
+   - funFact
+}
+
+
+ReviewService "1" -right-> "0..*" Review:  records
+
+
+ReviewController ..> ReviewService
+ReviewController ..> Review
+
+
+
+
+
+
+@enduml

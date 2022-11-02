@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+hide circle
+skinparam classAttributeIconSize 0
+
+class ReviewController {
+    +getReviewsByProductOrderByVotes():
+}
+
+
+class ReviewService {
++ ReviewService(ReviewRepository RevRepo)
++ getReviewsByProductOrderByVotes():
+}
+
+interface ReviewRepository <<interface>> {
++ getReviewsByProductOrderByVotes(long ReviewId):
+}
+
+
+class Review{
+    -ReviewId
+    -Text
+    -Rating
+    -Date
+    -Status
+    -upVote
+    -downVote
+   Review(reviewId,text,rating,date,status,upVote,downVote)
+   +setStatus(String status)
+}
+
+
+ReviewRepository "1" -right-> "0..*" Review:  records
+ReviewController ..> ReviewService
+ReviewService ..> ReviewRepository
+@enduml

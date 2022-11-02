@@ -1,0 +1,26 @@
+@startuml
+'https://plantuml.com/object-diagram
+
+left to right direction
+
+class Review{
+- reviewId
+- text
+- date
+- status
+- rating
+- upVotes
+- downVotes
+- funFact
+}
+
+class User{
+-Name
+-Password
+-Email
+-Address
+-Role
+}
+
+User "1"----"*" Review : makes  >
+@enduml

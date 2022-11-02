@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autoactivate on
+autonumber
+
+actor "Moderator" as User
+participant ":ReviewController" as Ctrl
+participant ":ReviewService" as Service
+participant ":ReviewRepository" as Rep
+
+activate User
+
+
+User -> Ctrl: PUT/review/{reviewId}/approve/{reviewStatus}
+Ctrl -> Service: approveRejectReview(reviewId,reviewStatus)
+Service -> Rep: getReviewById(reviewId)
+Rep --> Service: review
+Service -> Review: setStatus(status)
+Review --> Service: ok
+Service --> Ctrl: ok
+Ctrl --> User: ok
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+hide circle
+skinparam classAttributeIconSize 0
+
+class ReviewController {
+    +getAllMyReviews(offset, pageSize)
+}
+
+
+class ReviewService {
++ getAllMyReviews(offset,pageSize)
+}
+
+interface ReviewRepository <<interface>> {
++ getAllMyReviews(userId,pageable):
+}
+
+
+class Review{
+    -ReviewId
+    -Text
+    -Rating
+    -Date
+    -Status
+    -upVote
+    -downVote
+   Review(reviewId,text,rating,date,status,upVote,downVote)
+}
+
+
+ReviewRepository "1" -right-> "0..*" Review:  records
+ReviewController ..> ReviewService
+ReviewService ..> ReviewRepository
+@enduml
