@@ -27,4 +27,6 @@ public interface ReviewService {
 
     RatingFrequency getRatingFrequencyOfProduct(String sku);
 
+    String getStatus(Long reviewId);
+
 }

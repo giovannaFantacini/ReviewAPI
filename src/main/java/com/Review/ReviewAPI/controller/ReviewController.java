@@ -71,4 +71,8 @@ public class ReviewController {
         return service.getRatingFrequencyOfProduct(sku);
     }
 
+    @GetMapping(value = "/status/{reviewId}")
+    public String getStatus(@PathVariable ("reviewId") final Long reviewId) {
+        return service.getStatus(reviewId);
+    }
 }

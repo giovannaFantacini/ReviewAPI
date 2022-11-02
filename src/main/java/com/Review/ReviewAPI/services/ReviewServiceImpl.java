@@ -180,4 +180,10 @@ public class ReviewServiceImpl implements ReviewService {
         return new RatingFrequency(one, two, three, four, five, globalRating);
     }
 
+    @Override
+    public String getStatus(Long reviewId){
+        Review review = repository.getReviewById(reviewId);
+        return review.getStatus();
+    }
+
 }
