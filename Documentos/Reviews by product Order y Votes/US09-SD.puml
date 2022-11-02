@@ -12,6 +12,7 @@ participant ":ReviewRepository" as Rep
 activate User
 
 
+''FAZER AQUIQUIQUQI
 User -> Ctrl: GET/review/{sku}/votes?offset={offset}&pageSize={pageSize}
 Ctrl -> Service: getReviewsByProductOrderByVotes(sku,offset,pageSize)
 Service -> Rep: getReviewsByProductOrderByVotes(sku,pageable)

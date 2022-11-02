@@ -3,13 +3,19 @@ package com.Review.ReviewAPI.services;
 import com.Review.ReviewAPI.model.RatingFrequency;
 import com.Review.ReviewAPI.model.Review;
 import com.Review.ReviewAPI.model.ReviewDTO;
+import com.Review.ReviewAPI.repository.ProductRepository;
 import com.Review.ReviewAPI.repository.ReviewRepository;
+import com.Review.ReviewAPI.repository.VoteRepository;
 import com.Review.ReviewAPI.security.JwtUtils;
 import com.sun.jdi.LongValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,6 +30,12 @@ public class ReviewServiceImpl implements ReviewService {
     private ReviewRepository repository;
 
     @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private VoteRepository voteRepository;
+
+    @Autowired
     private JwtUtils jwtUtils;
 
     @Override
@@ -33,22 +45,13 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review create(ReviewDTO rev) throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                                .GET()
-                                .uri(URI.create("http://localhost:8080/products?sku=" + rev.getSku()))
-                                .build();
-
-        HttpResponse response = client.send(request,
-                HttpResponse.BodyHandlers.ofString());
-
-        var code = response.statusCode();
-        if(code == 200){
+        boolean isPresent = productRepository.isPresent(rev.getSku());
+        if(isPresent){
             Long userId = Long.valueOf(jwtUtils.getUserFromJwtToken(jwtUtils.getJwt()));
             final Review obj = Review.newFrom(rev,userId);
             return repository.save(obj);
         }else{
-            return (Review) response.body();
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Product doesn't exist");
         }
 
     }
@@ -69,21 +72,9 @@ public class ReviewServiceImpl implements ReviewService {
         List<Review> reviewsOrderByVote = new ArrayList<>();
         int sizeList = reviewsProduct.size();
         Map<Long,Integer> votesByReview = new HashMap<Long,Integer>();
-        HttpClient client = HttpClient.newHttpClient();
         for(int i=0; i<sizeList; i++){
-            HttpRequest request = HttpRequest.newBuilder()
-                    .GET()
-                    .uri(URI.create("http://localhost:8082/votes/" + reviewsProduct.get(i).getReviewId()))
-                    .build();
-
-            HttpResponse response = client.send(request,
-                    HttpResponse.BodyHandlers.ofString());
-
-            if(response.statusCode() == 200){
-                var votes = Integer.parseInt(response.body().toString());
-                votesByReview.put(reviewsProduct.get(i).getReviewId(), votes);
-            }
-
+            var votes = voteRepository.getVotesByReviewId(reviewsProduct.get(i).getReviewId());
+            votesByReview.put(reviewsProduct.get(i).getReviewId(), votes);
         }
 
         votesByReview = votesByReview.entrySet().stream()
@@ -130,26 +121,16 @@ public class ReviewServiceImpl implements ReviewService {
 
     public Boolean deleteReview(Long reviewId) throws IOException, InterruptedException {
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create("http://localhost:8082/votes/" + reviewId))
-                .build();
-
-        HttpResponse response = client.send(request,
-                HttpResponse.BodyHandlers.ofString());
-
-        if(response.statusCode() == 200){
-            var votes = Integer.parseInt(response.body().toString());
-            Long userId = Long.valueOf(jwtUtils.getUserFromJwtToken(jwtUtils.getJwt()));
-            Review review = repository.getReviewById(reviewId);
-            if(votes == 0 && Objects.equals(review.getUserId(), userId)){
-                repository.delete(review);
-                return true;
-            }
-        }
-        return  false;
+        var votes = voteRepository.getVotesByReviewId(reviewId);
+        Long userId = Long.valueOf(jwtUtils.getUserFromJwtToken(jwtUtils.getJwt()));
+        Review review = repository.getReviewById(reviewId);
+        if (votes == 0 && Objects.equals(review.getUserId(), userId)) {
+            repository.delete(review);
+            return true;
+        }else
+            return false;
     }
+
 
     @Override
     public RatingFrequency getRatingFrequencyOfProduct(String sku){
