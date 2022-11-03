@@ -1,0 +1,19 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autoactivate on
+autonumber
+
+actor "User" as User
+participant ":ReviewAPI" as rev1
+participant ":Vote" as vote
+
+activate User
+
+User -> rev1: GET/{skuProducts}/votes
+rev1 -> vote: GET/8082/votes/{reviewId}
+vote --> rev1: int
+rev1 --> User: Iterable<Review>
+
+
+@enduml

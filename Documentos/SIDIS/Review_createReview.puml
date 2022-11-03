@@ -1,0 +1,18 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autoactivate on
+autonumber
+
+actor "User" as User
+participant ":ReviewAPI" as rev1
+participant ":Product" as prod
+
+activate User
+
+User -> rev1: POST/reviews
+rev1 -> prod: GET/8080/products?sku={sku}
+prod --> rev1 : isPresent
+rev1 --> User: Review
+
+@enduml

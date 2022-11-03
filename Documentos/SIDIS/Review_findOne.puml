@@ -1,0 +1,18 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autoactivate on
+autonumber
+
+actor "User" as User
+participant ":ReviewAPI" as rev1
+participant ":Review" as rev2
+
+activate User
+
+User -> rev1: GET/reviews/{reviewId}
+rev1 -> rev2: GET/8086/reviews/{reviewId}
+rev2 --> rev1: Review
+rev1 --> User: Review
+
+@enduml
