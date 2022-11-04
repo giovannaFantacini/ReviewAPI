@@ -175,8 +175,11 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public String getStatus(Long reviewId){
+    public String getStatus(Long reviewId) throws IOException, InterruptedException {
         Review review = repository.getReviewById(reviewId);
+        if(review == null){
+           review = repository2.getReviewbyId(reviewId);
+        }
         return review.getStatus();
     }
 

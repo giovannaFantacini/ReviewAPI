@@ -1,19 +1,17 @@
 @startuml
 'https://plantuml.com/sequence-diagram
 
-autonumber
-
 autoactivate on
 autonumber
 
-actor "User" as User
-participant ":ReviewAPI" as rev1
-participant ":Review" as rev2
+actor "Vote" as User
+participant ":Review1" as rev1
+participant ":Review2" as rev2
 
 activate User
 
-User -> rev1: GET/status/{reviewId}
-rev1 -> rev2: GET/8086/status/{reviewId}
+User -> rev1: GET/reviews/status/{reviewId}
+rev1 -> rev2: GET/8086/reviews/status/{reviewId}
 rev2 -->rev1: String
 rev1 --> User: String
 @enduml

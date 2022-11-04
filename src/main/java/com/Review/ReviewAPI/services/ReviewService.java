@@ -28,6 +28,6 @@ public interface ReviewService {
 
     RatingFrequency getRatingFrequencyOfProduct(String sku) throws IOException, InterruptedException;
 
-    String getStatus(Long reviewId);
+    String getStatus(Long reviewId) throws IOException, InterruptedException;
 
 }

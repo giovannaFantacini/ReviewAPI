@@ -5,8 +5,8 @@ autoactivate on
 autonumber
 
 actor "User" as User
-participant ":ReviewAPI" as rev1
-participant ":Review" as rev2
+participant ":Review1" as rev1
+participant ":Review2" as rev2
 
 activate User
 
