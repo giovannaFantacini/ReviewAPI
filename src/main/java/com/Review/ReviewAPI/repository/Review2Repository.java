@@ -57,27 +57,6 @@ public class Review2Repository {
         return myObjects;
     }
 
-    public List<Review> getAllPendingReviews() throws IOException, InterruptedException {
-        //List<Review> finalList = null;
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create("http://localhost:8086/reviews/pending"))
-                .build();
-
-        HttpResponse response = client.send(request,
-                HttpResponse.BodyHandlers.ofString());
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String body = response.body().toString();
-        List<Review> myObjects = objectMapper.readValue(body, objectMapper.getTypeFactory().constructCollectionType(List.class, Review.class));
-        //finalList = Stream.concat(finalList.stream(), myObjects.stream()).collect(Collectors.toList());
-        if(myObjects==null){
-            myObjects = Collections.emptyList();
-        }
-        return myObjects;
-    }
-
 
     public List<Review> getReviewsBySku(String sku) throws IOException, InterruptedException {
         //List<Review> finalList = null;
@@ -100,32 +79,6 @@ public class Review2Repository {
         return myObjects;
     }
 
-    public Boolean approveRejectReview(Long reviewId, Boolean status) throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create("http://localhost:8086/reviews/"+reviewId+"/approve/"+status))
-                .build();
 
-        HttpResponse response = client.send(request,
-                HttpResponse.BodyHandlers.ofString());
-
-        var code = response.statusCode();
-        return code == 200;
-    }
-
-    public Boolean deleteReview(Long reviewId) throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create("http://localhost:8086/reviews/"+reviewId+"/remove"))
-                .build();
-
-        HttpResponse response = client.send(request,
-                HttpResponse.BodyHandlers.ofString());
-
-        var code = response.statusCode();
-        return code == 200;
-    }
 
 }

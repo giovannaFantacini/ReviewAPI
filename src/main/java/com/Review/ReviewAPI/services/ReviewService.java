@@ -15,6 +15,8 @@ public interface ReviewService {
 
     List<Review> getAllReviews() throws IOException, InterruptedException;
 
+    List<Review> getAllMyReviews();
+
     List<Review> getAllReviewsBySku(String sku) throws IOException, InterruptedException;
 
     List<Review> getReviewsByProductOrderByVotes(String sku) throws IOException, InterruptedException;

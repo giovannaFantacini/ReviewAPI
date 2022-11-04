@@ -9,6 +9,8 @@ import com.Review.ReviewAPI.repository.ReviewRepository;
 import com.Review.ReviewAPI.repository.VoteRepository;
 import com.Review.ReviewAPI.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -64,9 +66,16 @@ public class ReviewServiceImpl implements ReviewService {
         return Stream.concat(repository.getAllReviews().stream(), repository2.getAllReviews().stream()).collect(Collectors.toList());
     }
 
+
     @Override
-    public List <Review> getAllPendingReviews() throws IOException, InterruptedException {
-        return Stream.concat(repository.getAllPendingReviews().stream(), repository2.getAllPendingReviews().stream()).collect(Collectors.toList());
+    public List<Review> getAllPendingReviews(){
+        return repository.getAllPendingReviews();
+    }
+
+    @Override
+    public List<Review> getAllMyReviews(){
+        Long userId = Long.valueOf(jwtUtils.getUserFromJwtToken(jwtUtils.getJwt()));
+        return repository.getAllMyReviews(userId);
     }
 
     @Override
@@ -102,9 +111,9 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Boolean approveRejectReview(Long reviewId, Boolean status) throws IOException, InterruptedException {
+    public Boolean approveRejectReview(Long reviewId, Boolean status){
+        Review review = repository.getReviewById(reviewId);
         try {
-            Review review = repository.getReviewById(reviewId);
             if (Objects.equals(review.getStatus(), "PENDING")) {
                 if (status) {
                     review.setStatus("APPROVED");
@@ -113,28 +122,26 @@ public class ReviewServiceImpl implements ReviewService {
                 }
                 repository.save(review);
                 return true;
+            }else {
+                return false;
             }
-
         }catch (NullPointerException e){
-            return repository2.approveRejectReview(reviewId,status);
+            return false;
         }
-        return false;
+
     }
+
 
     public Boolean deleteReview(Long reviewId) throws IOException, InterruptedException {
 
         var votes = voteRepository.getVotesByReviewId(reviewId);
         Long userId = Long.valueOf(jwtUtils.getUserFromJwtToken(jwtUtils.getJwt()));
-        try {
-            Review review = repository.getReviewById(reviewId);
-            if (votes == 0 && Objects.equals(review.getUserId(), userId)) {
-                repository.delete(review);
-                return true;
-            }
-        }catch (NullPointerException e) {
-            return repository2.deleteReview(reviewId);
-        }
-        return false;
+        Review review = repository.getReviewById(reviewId);
+        if (votes == 0 && Objects.equals(review.getUserId(), userId)) {
+            repository.delete(review);
+            return true;
+        }else
+            return false;
     }
 
 

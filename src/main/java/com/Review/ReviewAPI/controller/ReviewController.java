@@ -33,6 +33,11 @@ public class ReviewController {
         return service.getAllReviews();
     }
 
+    @GetMapping(value = "/myReviews")
+    public Iterable<Review> getAllMyReviews() {
+        return service.getAllMyReviews();
+    }
+
     @GetMapping(value = "/{sku}/product")
     public List<Review> getAllReviewsBySku(@PathVariable("sku")final String sku) throws IOException, InterruptedException {
         return service.getAllReviewsBySku(sku);
