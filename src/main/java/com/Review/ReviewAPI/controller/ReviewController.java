@@ -12,7 +12,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/reviews")
@@ -21,13 +20,22 @@ public class ReviewController {
     private ReviewService service;
 
     @GetMapping(value = "/{reviewId}")
-    public Optional<Review> findOne(@PathVariable("reviewId") final Long reviewId) {
-        return service.findOne(reviewId);
+    public ResponseEntity<Review> findOne(@PathVariable("reviewId") final Long reviewId) throws IOException, InterruptedException {
+        Review review = service.getReviewById(reviewId);
+        if (review==null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Review not found");
+        }
+        return ResponseEntity.ok().body(review);
     }
 
     @GetMapping(value = "/")
-    public List<Review> getAllReviews() {
+    public List<Review> getAllReviews() throws IOException, InterruptedException {
         return service.getAllReviews();
+    }
+
+    @GetMapping(value = "/{sku}/product")
+    public List<Review> getAllReviewsBySku(@PathVariable("sku")final String sku) throws IOException, InterruptedException {
+        return service.getAllReviewsBySku(sku);
     }
 
     @PostMapping
@@ -43,12 +51,12 @@ public class ReviewController {
     }
 
     @GetMapping(value = "/pending")
-    public Iterable<Review> getAllPendingReviews(@RequestParam("offset") final int offset ,@RequestParam("pageSize") final int size) {
-        return service.getAllPendingReviews(offset,size);
+    public Iterable<Review> getAllPendingReviews() throws IOException, InterruptedException {
+        return service.getAllPendingReviews();
     }
 
     @PutMapping(value = "/{reviewId}/approve/{reviewStatus}")
-    public ResponseEntity<String> approveRejectReview(@PathVariable("reviewId") final Long reviewId, @PathVariable ("reviewStatus") final Boolean reviewStatus){
+    public ResponseEntity<String> approveRejectReview(@PathVariable("reviewId") final Long reviewId, @PathVariable ("reviewStatus") final Boolean reviewStatus) throws IOException, InterruptedException {
         Boolean status = service.approveRejectReview(reviewId,reviewStatus);
         if(!status){
             return ResponseEntity.ok("The review's id you gave it's not associated with a review or this is not in PENDING status");
@@ -67,7 +75,7 @@ public class ReviewController {
     }
 
     @GetMapping(value = "/{sku}/rating")
-    public RatingFrequency getRatingFrequency(@PathVariable("sku") final String sku) {
+    public RatingFrequency getRatingFrequency(@PathVariable("sku") final String sku) throws IOException, InterruptedException {
         return service.getRatingFrequencyOfProduct(sku);
     }
 

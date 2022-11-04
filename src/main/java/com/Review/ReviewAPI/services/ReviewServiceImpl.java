@@ -4,31 +4,26 @@ import com.Review.ReviewAPI.model.RatingFrequency;
 import com.Review.ReviewAPI.model.Review;
 import com.Review.ReviewAPI.model.ReviewDTO;
 import com.Review.ReviewAPI.repository.ProductRepository;
+import com.Review.ReviewAPI.repository.Review2Repository;
 import com.Review.ReviewAPI.repository.ReviewRepository;
 import com.Review.ReviewAPI.repository.VoteRepository;
 import com.Review.ReviewAPI.security.JwtUtils;
-import com.sun.jdi.LongValue;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private ReviewRepository repository;
 
+    @Autowired
+    private Review2Repository repository2;
     @Autowired
     private ProductRepository productRepository;
 
@@ -39,8 +34,12 @@ public class ReviewServiceImpl implements ReviewService {
     private JwtUtils jwtUtils;
 
     @Override
-    public Optional<Review> findOne(Long reviewId) {
-        return repository.findById(reviewId);
+    public Review getReviewById(Long reviewId) throws IOException, InterruptedException {
+        Review review = repository.getReviewById(reviewId);
+        if(review == null){
+            return repository2.getReviewbyId(reviewId);
+        }
+        return review;
     }
 
     @Override
@@ -55,20 +54,24 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
     }
-
     @Override
-    public List<Review> getAllReviews() {
-        return repository.getAllReviews();
+    public List<Review> getAllReviewsBySku(String sku) throws IOException, InterruptedException {
+        return Stream.concat(repository.getReviewsByProduct(sku).stream(), repository2.getReviewsBySku(sku).stream()).collect(Collectors.toList());
     }
 
     @Override
-    public Page <Review> getAllPendingReviews(int offset, int pageSize){
-        return repository.getAllPendingReviews(PageRequest.of(offset,pageSize));
+    public List<Review> getAllReviews() throws IOException, InterruptedException {
+        return Stream.concat(repository.getAllReviews().stream(), repository2.getAllReviews().stream()).collect(Collectors.toList());
+    }
+
+    @Override
+    public List <Review> getAllPendingReviews() throws IOException, InterruptedException {
+        return Stream.concat(repository.getAllPendingReviews().stream(), repository2.getAllPendingReviews().stream()).collect(Collectors.toList());
     }
 
     @Override
     public List<Review> getReviewsByProductOrderByVotes(String sku) throws IOException, InterruptedException {
-        List<Review> reviewsProduct = repository.getReviewsByProduct(sku);
+        List<Review> reviewsProduct = Stream.concat(repository.getReviewsByProduct(sku).stream(), repository2.getReviewsBySku(sku).stream()).collect(Collectors.toList());
         List<Review> reviewsOrderByVote = new ArrayList<>();
         int sizeList = reviewsProduct.size();
         Map<Long,Integer> votesByReview = new HashMap<Long,Integer>();
@@ -99,9 +102,9 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Boolean approveRejectReview(Long reviewId, Boolean status){
-        Review review = repository.getReviewById(reviewId);
+    public Boolean approveRejectReview(Long reviewId, Boolean status) throws IOException, InterruptedException {
         try {
+            Review review = repository.getReviewById(reviewId);
             if (Objects.equals(review.getStatus(), "PENDING")) {
                 if (status) {
                     review.setStatus("APPROVED");
@@ -110,32 +113,35 @@ public class ReviewServiceImpl implements ReviewService {
                 }
                 repository.save(review);
                 return true;
-            }else {
-                return false;
             }
-        }catch (NullPointerException e){
-            return false;
-        }
 
+        }catch (NullPointerException e){
+            return repository2.approveRejectReview(reviewId,status);
+        }
+        return false;
     }
 
     public Boolean deleteReview(Long reviewId) throws IOException, InterruptedException {
 
         var votes = voteRepository.getVotesByReviewId(reviewId);
         Long userId = Long.valueOf(jwtUtils.getUserFromJwtToken(jwtUtils.getJwt()));
-        Review review = repository.getReviewById(reviewId);
-        if (votes == 0 && Objects.equals(review.getUserId(), userId)) {
-            repository.delete(review);
-            return true;
-        }else
-            return false;
+        try {
+            Review review = repository.getReviewById(reviewId);
+            if (votes == 0 && Objects.equals(review.getUserId(), userId)) {
+                repository.delete(review);
+                return true;
+            }
+        }catch (NullPointerException e) {
+            return repository2.deleteReview(reviewId);
+        }
+        return false;
     }
 
 
     @Override
-    public RatingFrequency getRatingFrequencyOfProduct(String sku){
+    public RatingFrequency getRatingFrequencyOfProduct(String sku) throws IOException, InterruptedException {
 
-        List<Review> reviews = repository.getReviewsByProduct(sku);
+        List<Review> reviews = Stream.concat(repository.getReviewsByProduct(sku).stream(), repository2.getReviewsBySku(sku).stream()).collect(Collectors.toList());
         int rating;
         int one=0, two=0, three=0, four=0, five=0;
         RatingFrequency freq = new RatingFrequency();

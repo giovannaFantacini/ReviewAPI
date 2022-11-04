@@ -1,7 +1,6 @@
 package com.Review.ReviewAPI.repository;
 
 import com.Review.ReviewAPI.model.Review;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,10 +19,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> getReviewsByProduct(@Param("skuProduct") String skuProduct);
 
     @Query("SELECT r FROM Review r WHERE r.status ='PENDING'")
-    Page <Review> getAllPendingReviews(Pageable pageable);
+    List <Review> getAllPendingReviews();
 
     @Query("SELECT r FROM Review r WHERE r.userId = :userId")
-    Page <Review> getAllMyReviews(@Param("userId") Long userId,Pageable pageable);
+    List <Review> getAllMyReviews(@Param("userId") Long userId,Pageable pageable);
 
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.skuProduct = :sku")
     Float getAggregatedRating(@Param("sku") String sku);
