@@ -85,7 +85,7 @@ public class ReviewController {
     }
 
     @GetMapping(value = "/status/{reviewId}")
-    public String getStatus(@PathVariable ("reviewId") final Long reviewId) {
+    public String getStatus(@PathVariable ("reviewId") final Long reviewId) throws IOException, InterruptedException {
         return service.getStatus(reviewId);
     }
 }
