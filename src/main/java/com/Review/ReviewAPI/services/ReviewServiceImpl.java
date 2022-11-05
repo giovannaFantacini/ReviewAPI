@@ -9,8 +9,6 @@ import com.Review.ReviewAPI.repository.ReviewRepository;
 import com.Review.ReviewAPI.repository.VoteRepository;
 import com.Review.ReviewAPI.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -58,12 +56,20 @@ public class ReviewServiceImpl implements ReviewService {
     }
     @Override
     public List<Review> getAllReviewsBySku(String sku) throws IOException, InterruptedException {
-        return Stream.concat(repository.getReviewsByProduct(sku).stream(), repository2.getReviewsBySku(sku).stream()).collect(Collectors.toList());
+        List<Review> reviews = repository.getReviewsByProduct(sku);
+        if (reviews.isEmpty()){
+            return repository2.getReviewsBySku(sku);
+        }
+        return reviews;
     }
 
     @Override
     public List<Review> getAllReviews() throws IOException, InterruptedException {
-        return Stream.concat(repository.getAllReviews().stream(), repository2.getAllReviews().stream()).collect(Collectors.toList());
+        List<Review> reviews = repository.getAllReviews();
+        if(reviews.isEmpty()){
+            return repository2.getAllReviews();
+        }
+        return reviews;
     }
 
 
@@ -80,7 +86,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<Review> getReviewsByProductOrderByVotes(String sku) throws IOException, InterruptedException {
-        List<Review> reviewsProduct = Stream.concat(repository.getReviewsByProduct(sku).stream(), repository2.getReviewsBySku(sku).stream()).collect(Collectors.toList());
+        List<Review> reviewsProduct = repository.getReviewsByProduct(sku);
+        if (reviewsProduct.isEmpty()){
+            reviewsProduct = repository2.getReviewsBySku(sku);
+        }
         List<Review> reviewsOrderByVote = new ArrayList<>();
         int sizeList = reviewsProduct.size();
         Map<Long,Integer> votesByReview = new HashMap<Long,Integer>();
