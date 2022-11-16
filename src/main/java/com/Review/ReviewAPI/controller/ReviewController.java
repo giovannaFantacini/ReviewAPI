@@ -28,6 +28,15 @@ public class ReviewController {
         return ResponseEntity.ok().body(review);
     }
 
+    @GetMapping(value = "/internal/{reviewId}")
+    public ResponseEntity<Review> internalFindOne(@PathVariable("reviewId") final Long reviewId){
+        Review review = service.internalGetReviewById(reviewId);
+        if (review==null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Review not found");
+        }
+        return ResponseEntity.ok().body(review);
+    }
+
     @GetMapping(value = "/")
     public List<Review> getAllReviews() throws IOException, InterruptedException {
         return service.getAllReviews();
@@ -41,6 +50,11 @@ public class ReviewController {
     @GetMapping(value = "/{sku}/product")
     public List<Review> getAllReviewsBySku(@PathVariable("sku")final String sku) throws IOException, InterruptedException {
         return service.getAllReviewsBySku(sku);
+    }
+
+    @GetMapping(value = "/internal/{sku}/product")
+    public List<Review> internalGetAllReviewsBySku(@PathVariable("sku")final String sku){
+        return service.internalGetAllReviewsBySku(sku);
     }
 
     @PostMapping

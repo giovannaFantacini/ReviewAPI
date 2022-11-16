@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,6 +44,11 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public Review internalGetReviewById(Long reviewId) {
+        return repository.getReviewById(reviewId);
+    }
+
+    @Override
     public Review create(ReviewDTO rev) throws IOException, InterruptedException {
         boolean isPresent = productRepository.isPresent(rev.getSku());
         if(isPresent){
@@ -64,14 +70,14 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<Review> getAllReviews() throws IOException, InterruptedException {
-        List<Review> reviews = repository.getAllReviews();
-        if(reviews.isEmpty()){
-            return repository2.getAllReviews();
-        }
-        return reviews;
+    public List<Review> internalGetAllReviewsBySku(String sku){
+        return repository.getReviewsByProduct(sku);
     }
 
+    @Override
+    public List<Review> getAllReviews(){
+        return repository.getAllReviews();
+    }
 
     @Override
     public List<Review> getAllPendingReviews(){
@@ -160,7 +166,6 @@ public class ReviewServiceImpl implements ReviewService {
         List<Review> reviews = Stream.concat(repository.getReviewsByProduct(sku).stream(), repository2.getReviewsBySku(sku).stream()).collect(Collectors.toList());
         int rating;
         int one=0, two=0, three=0, four=0, five=0;
-        RatingFrequency freq = new RatingFrequency();
         for (int i=0; i< reviews.size(); i++){
             rating=reviews.get(i).getRating();
             if (rating == 1){
@@ -179,8 +184,14 @@ public class ReviewServiceImpl implements ReviewService {
                 five = five + 1;
             }
         }
-        float globalRating = repository.getAggregatedRating(sku);
-        return new RatingFrequency(one, two, three, four, five, globalRating);
+        int some = one+two+three+four+five;
+        if (some != 0) {
+            float globalRating = (one * 1 + two * 2 + three * 3 + four * 4 + five * 5) / some;
+            return new RatingFrequency(one, two, three, four, five, globalRating);
+        }else{
+            float globalRating = 0;
+            return new RatingFrequency(one, two, three, four, five, globalRating);
+        }
     }
 
     @Override

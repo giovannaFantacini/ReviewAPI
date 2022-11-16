@@ -20,7 +20,7 @@ public class Review2Repository {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create("http://localhost:8086/reviews/" + reviewId))
+                .uri(URI.create("http://localhost:8086/reviews/internal/" + reviewId))
                 .build();
 
         HttpResponse response = client.send(request,
@@ -35,35 +35,11 @@ public class Review2Repository {
         return null;
     }
 
-    public List<Review> getAllReviews() throws IOException, InterruptedException {
-        //List<Review> finalList = null;
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(URI.create("http://localhost:8086/reviews/"))
-                .build();
-
-        HttpResponse response = client.send(request,
-                HttpResponse.BodyHandlers.ofString());
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String body = response.body().toString();
-        List<Review> myObjects = objectMapper.readValue(body, objectMapper.getTypeFactory().constructCollectionType(List.class, Review.class));
-        //finalList.addAll(myObjects);
-        if(myObjects==null){
-            myObjects = Collections.emptyList();
-        }
-
-        return myObjects;
-    }
-
-
     public List<Review> getReviewsBySku(String sku) throws IOException, InterruptedException {
-        //List<Review> finalList = null;
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create("http://localhost:8086/reviews/"+sku+"/product"))
+                .uri(URI.create("http://localhost:8086/reviews/internal/"+sku+"/product"))
                 .build();
 
         HttpResponse response = client.send(request,
@@ -72,7 +48,6 @@ public class Review2Repository {
         ObjectMapper objectMapper = new ObjectMapper();
         String body = response.body().toString();
         List<Review> myObjects = objectMapper.readValue(body, objectMapper.getTypeFactory().constructCollectionType(List.class, Review.class));
-        //finalList = Stream.concat(finalList.stream(), myObjects.stream()).collect(Collectors.toList());
         if(myObjects==null){
             myObjects = Collections.emptyList();
         }
